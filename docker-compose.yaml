@@ -6,11 +6,3 @@ services:
     container_name: nginx
     ports:
       - '80:80'
-    networks:
-      - user2-instance_network
-      - user-instance_network
-networks:
-  user2-instance_network:
-    external: true
-  user-instance_network:
-    external: true
