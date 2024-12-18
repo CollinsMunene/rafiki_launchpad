@@ -1,0 +1,162 @@
+version: '3.5'
+
+x-logging: &logging
+  logging:
+    driver: 'json-file'
+    options:
+      max-size: '100m'
+
+services:
+  postgres:
+    container_name: ${INSTANCE_NAME}_postgres
+    image: 'postgres:15'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    # ports:
+    #   - '5433:5432'
+    restart: unless-stopped
+    networks:
+      - ${INSTANCE_NAME}_network
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+      - ../dbinit.sql:/docker-entrypoint-initdb.d/init.sql
+
+  # Rafiki
+  rafiki-auth:
+    container_name: ${INSTANCE_NAME}_rafiki-auth
+    image: ghcr.io/interledger/rafiki-auth:v1.0.0-alpha.17
+    restart: always
+    networks:
+      - ${INSTANCE_NAME}_network
+    # ports:
+    #   - '3006:3006'
+    #   - '3008:3008'
+    environment:
+      AUTH_PORT: 3006
+      INTROSPECTION_PORT: 3007
+      ADMIN_PORT: 3008
+      TRUST_PROXY: true
+      NODE_ENV: development
+      AUTH_SERVER_URL: http://localhost:3006
+      AUTH_DATABASE_URL: postgresql://rafiki_auth:rafiki_auth@postgres/rafiki_auth
+      IDENTITY_SERVER_URL: http://localhost:4003/grant-interactions
+      IDENTITY_SERVER_SECRET: ${AUTH_IDENTITY_SERVER_SECRET:-327132b5-99e9-4eb8-8a25-2b7d7738ece1}
+      COOKIE_KEY: ${AUTH_COOKIE_KEY:-8fd398393c47dd27a3167d9c081c094f}
+      WAIT_SECONDS: 1
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      - postgres
+    <<: *logging
+
+  rafiki-backend:
+    container_name: ${INSTANCE_NAME}_rafiki-backend
+    image: ghcr.io/interledger/rafiki-backend:v1.0.0-alpha.17
+    restart: always
+    privileged: true
+    volumes:
+      - ../temp/:/workspace/temp/
+    # ports:
+      # - '3010:80' # wallet openpayment base
+      # - '3001:3001' # admin graphql
+      # - '3005:3005'
+      # - '3002:3002'
+    networks:
+      - ${INSTANCE_NAME}_network
+    environment:
+      NODE_ENV: dev
+      LOG_LEVEL: debug
+      TRUST_PROXY: true
+      ADMIN_PORT: 3001
+      CONNECTOR_PORT: 3002
+      OPEN_PAYMENTS_PORT: 80
+      DATABASE_URL: postgresql://rafiki_backend:rafiki_backend@postgres/rafiki_backend
+      USE_TIGERBEETLE: true
+      TIGERBEETLE_CLUSTER_ID: 0
+      TIGERBEETLE_REPLICA_ADDRESSES: ${INSTANCE_NAME}_tigerbeetle:4345
+      NONCE_REDIS_KEY: test
+      AUTH_SERVER_GRANT_URL: http://rafiki.vuza.finance:3006
+      AUTH_SERVER_INTROSPECTION_URL: http://rafiki-auth:3007
+      ILP_ADDRESS: test.vuza-finance
+      ILP_CONNECTOR_URL: http://rafiki.vuza.finance:3002
+      STREAM_SECRET: BjPXtnd00G2mRQwP/8ZpwyZASOch5sUXT5o0iR5b5wU=
+      ADMIN_KEY: admin
+      OPEN_PAYMENTS_URL: https://rafiki.vuza.finance
+      REDIS_URL: redis://redis:6379/0
+      WALLET_ADDRESS_URL: https://rafiki.vuza.finance/.well-known/pay
+      # Testnet urls -  implemented
+      WEBHOOK_URL: https://api.vuza.finance/api/v1/webhooks
+      WEBHOOK_TIMEOUT: 60000
+      EXCHANGE_RATES_URL: https://api.vuza.finance/api/v1/rates
+      ENABLE_AUTO_PEERING: true
+      AUTO_PEERING_SERVER_PORT: 3005
+      INSTANCE_NAME: '${INSTANCE_NAME} Wallet'
+      SLIPPAGE: 0.01
+      KEY_ID: rafiki
+    depends_on:
+      - postgres
+      - redis
+    <<: *logging
+
+  kratos:
+    container_name: "${INSTANCE_NAME}_kratos"
+    image: 'oryd/kratos:v1.2.0'
+    privileged: true
+    depends_on:
+      - postgres
+      - mailslurper
+    # ports:
+    #   - '4433:4433'
+    volumes:
+      - ../entrypoint.sh:/entrypoint.sh
+      - ../identity.schema.json:/etc/config/kratos/identity.schema.json
+      - ./kratos.yml:/etc/config/kratos/kratos.yml
+    entrypoint: ['/entrypoint.sh']
+    networks:
+      - ${INSTANCE_NAME}_network
+
+  tigerbeetle:
+    container_name: "${INSTANCE_NAME}_tigerbeetle"
+    image: ghcr.io/tigerbeetle/tigerbeetle:0.15.4
+    privileged: true
+    volumes:
+      - tigerbeetle-data:/var/lib/tigerbeetle
+    networks:
+      - ${INSTANCE_NAME}_network
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        set -ex
+        DATA_FILE=/var/lib/tigerbeetle/cluster_0_replica_0.tigerbeetle
+        set +e
+        ls $$DATA_FILE
+        DATA_FILE_EXISTS="$$?"
+        set -e
+        echo $$DATA_FILE_EXISTS
+        if [ "$$DATA_FILE_EXISTS" != 0 ]; then 
+          ./tigerbeetle format --cluster=0 --replica=0 --replica-count=1 $$DATA_FILE; 
+        fi
+        hostname -i
+        ls /var/lib/tigerbeetle
+        ./tigerbeetle start --addresses=0.0.0.0:4345 $$DATA_FILE
+
+  redis:
+    container_name: "${INSTANCE_NAME}_redis"
+    image: 'redis:7'
+    restart: unless-stopped
+    networks:
+      - ${INSTANCE_NAME}_network
+
+  mailslurper:
+    container_name: "${INSTANCE_NAME}_mailslurper"
+    image: oryd/mailslurper:latest-smtps
+    # ports:
+    #   - '4436:4436'
+    #   - '4437:4437'
+    networks:
+      - ${INSTANCE_NAME}_network
+
+volumes:
+  pg-data:
+  tigerbeetle-data: # named volumes can be managed easier using docker-compose
