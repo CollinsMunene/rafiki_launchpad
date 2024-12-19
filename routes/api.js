@@ -359,7 +359,7 @@ router.post("/create-instance", (req, res) => {
                         const newInstance = {
                           id: containerId, // Use the container ID as the unique instance ID
                           instance_name: instanceName,
-                          admin_api: `${instanceName}.local`,
+                          admin_api: `${instanceName}.rafiki-launchpad.devligence.com`,
                           created_at: createdAt,
                           status: status || 'Active', // Default to 'Active' if status is undefined
                         };
