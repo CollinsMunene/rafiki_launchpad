@@ -5,4 +5,4 @@ FROM nginx:alpine
 COPY default.conf /etc/nginx/conf.d/
 
 # Expose port 80
-EXPOSE 80
+EXPOSE 8080

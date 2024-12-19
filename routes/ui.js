@@ -7,7 +7,7 @@ router.get("/", function (req, res, next) {
   res.render("index", { title: "Rafiki Launch Pad" });
 });
 
-router.get("/instances/new", function (req, res, next) {
+router.get("/new/instance", function (req, res, next) {
   res.render("instance_new", { title: "Rafiki Launch Pad || New Instance" });
 });
 

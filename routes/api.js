@@ -238,7 +238,7 @@ router.post("/create-instance", (req, res) => {
   const nginxTemplate = `
    server {
        listen 80;
-       server_name ${instanceName}.local;
+       server_name ${instanceName}.rafiki-launchpad.devligence.com;
 
        location / {
            resolver 127.0.0.11 valid=30s;
@@ -308,6 +308,7 @@ router.post("/create-instance", (req, res) => {
           }
           console.log("here");
           console.log(stdout, stderr);
+          
 
           // Create Nginx
           exec(
