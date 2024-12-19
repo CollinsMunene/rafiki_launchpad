@@ -150,6 +150,7 @@ router.post("/get-new-token", (req, res) => {
 // get user instances
 router.get("/get-instances", (req, res) => {
   const token = req.headers["authorization"]?.split(" ")[1];
+  console.log(token)
 
   if (!token) {
     return res.status(401).json({ error: "No token provided" });
