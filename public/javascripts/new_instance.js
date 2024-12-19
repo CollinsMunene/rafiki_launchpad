@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:3000";
+const BASE_URL = "http://rafiki-launchpad.devligence.com";
 
 document.getElementById("instanceName").addEventListener("input", function (event) {
     const input = event.target;

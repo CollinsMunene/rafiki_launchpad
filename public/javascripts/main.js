@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:3000";
+const BASE_URL = "http://rafiki-launchpad.devligence.com";
 
 const getOrCreateToken = async () => {
   let token = localStorage.getItem("rafikiLaunchPadToken");
