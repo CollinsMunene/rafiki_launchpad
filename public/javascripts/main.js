@@ -77,7 +77,12 @@ const fetchInstances = async () => {
       dataTable.on('datatable.init', () => {
         console.log('DataTable initialized with dynamic data');
       });
-      document.getElementById("table-header").style.backgroundColor='#64aeaa';
+      const tableRows = document.querySelectorAll('#search-table tr');
+
+      // Update the background color of each <tr>
+      tableRows.forEach((row) => {
+        row.style.backgroundColor = '#64aeaa';
+      });
     }
 
   } else {
