@@ -29,18 +29,8 @@ function getNextInstanceIndex(callback) {
       /_network$/.test(name)
     );
     launchPadLogger.info(instanceNetworks);
-    // Extract numeric indices (if available) from filtered network names
-    const indices = instanceNetworks.map((name) => {
-      const match = name.match(/(\d+)(?=-.*_network$)/);
-      return match ? parseInt(match[1], 10) : 0;
-    });
 
-
-    launchPadLogger.info(indices);
-    // Determine the next available index
-    const nextIndex = indices.length > 0 ? Math.max(...indices) : 1;
-    launchPadLogger.info(nextIndex);
-    callback(null, nextIndex);
+    callback(null, instanceNetworks.length);
   });
 }
 
