@@ -22,19 +22,24 @@ function getNextInstanceIndex(callback) {
     }
     // Split output into individual network names
     const allNetworks = stdout.split("\n").filter(Boolean);
+    launchPadLogger.info(allNetworks);
 
     // Find networks matching the format: _network
     const instanceNetworks = allNetworks.filter((name) =>
       /_network$/.test(name)
     );
+    launchPadLogger.info(instanceNetworks);
     // Extract numeric indices (if available) from filtered network names
     const indices = instanceNetworks.map((name) => {
       const match = name.match(/(\d+)(?=-.*_network$)/);
       return match ? parseInt(match[1], 10) : 0;
     });
 
+
+    launchPadLogger.info(indices);
     // Determine the next available index
     const nextIndex = indices.length > 0 ? Math.max(...indices) : 1;
+    launchPadLogger.info(nextIndex);
     callback(null, nextIndex);
   });
 }
