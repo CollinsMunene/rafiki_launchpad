@@ -1,5 +1,3 @@
-const { launchPadLogger } = require("../../utils/launchPadLogger");
-
 const BASE_URL = "http://rafiki-launchpad.devligence.com";
 
 const getOrCreateToken = async () => {
@@ -71,13 +69,13 @@ const fetchInstances = async () => {
 
       // Optional: Add event listeners or callbacks as needed
       dataTable.on('datatable.init', () => {
-        launchPadLogger.log('DataTable initialized with dynamic data');
+        console.log('DataTable initialized with dynamic data');
       });
     }
 
   } else {
-    launchPadLogger.log(response);
-    launchPadLogger.error("Failed to fetch instances");
+    console.log(response);
+    console.error("Failed to fetch instances");
   }
 
 
