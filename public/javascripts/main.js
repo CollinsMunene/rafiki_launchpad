@@ -50,17 +50,17 @@ const fetchInstances = async () => {
 
       const row = `
       <tr>
-        <td class="dark:text-white">${instance.id}</td>
+        <td class="font-medium text-gray-900">${instance.id}</td>
         <td
-          class="font-medium text-gray-900 whitespace-nowrap dark:text-white"
+          class="font-medium text-gray-900 whitespace-nowrap "
         >
           ${instance.instance_name}
         </td>
-        <td class="dark:text-white">
+        <td style="color:blue">
           <a href="http://${instance.admin_api}/graphql" target="_blank">http://${instance.admin_api}/graphql</a>
         </td>
-        <td class="dark:text-white">${formattedDate}</td>
-        <td class="dark:text-white">${instance.status.toUpperCase()}</td>
+        <td  class="font-medium text-gray-900">${formattedDate}</td>
+        <td  class="font-medium text-gray-900">${instance.status.toUpperCase()}</td>
       </tr>
     `;
       tableBody.insertAdjacentHTML('beforeend', row);
