@@ -35,7 +35,7 @@ function getNextInstanceIndex(callback) {
     console.log(indices);
 
     // Determine the next available index
-    const nextIndex = indices.length > 0 ? Math.max(...indices) + 1 : 1;
+    const nextIndex = indices.length > 0 ? Math.max(...indices) : 1;
     callback(null, nextIndex);
   });
 }
