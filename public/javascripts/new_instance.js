@@ -1,3 +1,6 @@
+const { showToast } = require("../../utils/helpers");
+const { launchPadLogger } = require("../../utils/launchPadLogger");
+
 const BASE_URL = "http://rafiki-launchpad.devligence.com";
 
 document.getElementById("instanceName").addEventListener("input", function (event) {
@@ -35,7 +38,7 @@ document.getElementById('createInstanceButton').addEventListener('click', functi
     const submit_button = document.getElementById('createInstanceButton');
     let token = localStorage.getItem("rafikiLaunchPadToken");
     if (!token) {
-        console.error("Failed to create instance");
+        launchPadLogger.error("Failed to create instance");
     }
     const form = document.getElementById('instanceForm');
     const formData = new FormData(form);
@@ -61,7 +64,6 @@ document.getElementById('createInstanceButton').addEventListener('click', functi
         return response.json()
     })
     .then(data => {
-        console.log(data)
         submit_button.innerHTML='Complete'
         submit_button.disabled = false
         if(data.status!=200){
@@ -79,23 +81,11 @@ document.getElementById('createInstanceButton').addEventListener('click', functi
 
     })
     .catch(error => {
-        console.error('Error:', error);
+        launchPadLogger.error('Error:', error);
         alert('Failed to create instance.');
     });
 });
 
-
-function showToast(message,toast_type) {
-    const toast = document.getElementById(`toast-${toast_type}`);
-    const toastMessage = document.getElementById(`toast-message-${toast_type}`);
-    toastMessage.textContent = message;
-    toast.classList.remove('hidden');
-    
-    // Automatically hide the toast after 3 seconds
-    setTimeout(() => {
-        toast.classList.add('hidden');
-    }, 3000);
-}
 
 document.getElementById('toast-close').addEventListener('click', function() {
     document.getElementById('toast').classList.add('hidden');

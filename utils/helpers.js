@@ -1,6 +1,4 @@
 const fs = require('fs');
-const path = require('path');
-
 
 // Helper to read JSON database
 const readDatabase = (DB_FILE) => {
@@ -13,4 +11,16 @@ const writeDatabase = (DB_FILE,data) => {
     fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf8');
 };
 
-module.exports = { readDatabase, writeDatabase };
+const showToast = (message,toast_type) => {
+  const toast = document.getElementById(`toast-${toast_type}`);
+  const toastMessage = document.getElementById(`toast-message-${toast_type}`);
+  toastMessage.textContent = message;
+  toast.classList.remove('hidden');
+  
+  // Automatically hide the toast after 3 seconds
+  setTimeout(() => {
+      toast.classList.add('hidden');
+  }, 3000);
+}
+
+module.exports = { readDatabase, writeDatabase, showToast };
