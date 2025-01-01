@@ -22,13 +22,13 @@ function getNextInstanceIndex(callback) {
     }
     // Split output into individual network names
     const allNetworks = stdout.split("\n").filter(Boolean);
-    launchPadLogger.info(allNetworks);
+    launchPadLogger.debug(allNetworks);
 
     // Find networks matching the format: _network
     const instanceNetworks = allNetworks.filter((name) =>
       /_network$/.test(name)
     );
-    launchPadLogger.info(instanceNetworks);
+    launchPadLogger.debug(instanceNetworks);
 
     callback(null, instanceNetworks.length);
   });
@@ -41,8 +41,8 @@ function getDynamicSubnet(instanceIndex) {
   // Make thirdOctet align properly: starting from 1 when instanceIndex = 0
   const thirdOctet = instanceIndex + 1;
 
-  launchPadLogger.log("new instance index");
-  launchPadLogger.log(thirdOctet);
+  launchPadLogger.debug("new instance index");
+  launchPadLogger.debug(thirdOctet);
 
   return {
     subnet: `${baseSubnet}.${thirdOctet}.0/24`,
@@ -156,189 +156,182 @@ router.get("/get-instances", (req, res) => {
 
 
 // POST endpoint to handle instance creation for a user
-// router.post("/create-instance", (req, res) => {
-//   // Handle check user token
-//   const token = req.headers["authorization"]?.split(" ")[1];
+router.post("/create-instance", (req, res) => {
+  // Handle check user token
+  const token = req.headers["authorization"]?.split(" ")[1];
 
-//   if (!token) {
-//     return res.status(401).json({status:401, message: "No token provided" });
-//   }
+  if (!token) {
+    return res.status(401).json({status:401, message: "No token provided" });
+  }
 
-//   const database = readDatabase(DB_FILE);
+  const database = readDatabase(DB_FILE);
 
-//   if (!database[token]) {
-//     return res.status(404).json({ status:404, message: 'Token does not exist in database' });
-//   }
+  if (!database[token]) {
+    return res.status(404).json({ status:404, message: 'Token does not exist in database' });
+  }
 
 
-//   const instanceName = req.body.instanceName;
-//   const instanceExchangeRateURL = req.body.instanceExchangeRateURL || "";
-//   const instanceWebhookURL = req.body.instanceWebhookURL || "";
+  const instanceName = req.body.instanceName;
+  const instanceExchangeRateURL = req.body.instanceExchangeRateURL || "";
+  const instanceWebhookURL = req.body.instanceWebhookURL || "";
 
-//   if (!instanceName) {
-//     return res.status(400).json({status:400, message: "Instance name is required." });
-//   }
+  if (!instanceName) {
+    return res.status(400).json({status:400, message: "Instance name is required." });
+  }
 
-//   const instanceDir = path.join(__dirname, "../rafiki_instances", instanceName);
+  const instanceDir = path.join(__dirname, "../rafiki_instances", instanceName);
 
-//   if (fs.existsSync(instanceDir)) {
-//     return res.status(400).json({ status:400,message: "Instance already exists.Kindly use another name" });
-//   }
+  if (fs.existsSync(instanceDir)) {
+    return res.status(400).json({ status:400,message: "Instance already exists.Kindly use another name" });
+  }
 
-//   // Define Nginx Configuration Template
-//   const nginxTemplate = `
-//    server {
-//        listen 80;
-//        server_name ${instanceName}.rafiki-launchpad.devligence.com;
+  // Define Nginx Configuration Template
+  const nginxTemplate = `
+   server {
+       listen 80;
+       server_name ${instanceName}.rafiki-launchpad.devligence.com;
 
-//        location / {
-//            resolver 127.0.0.11 valid=30s;
-//            set $backend "${instanceName}_rafiki-backend:3001";
-//            proxy_pass http://$backend;
+       location / {
+           resolver 127.0.0.11 valid=30s;
+           set $backend "${instanceName}_rafiki-backend:3001";
+           proxy_pass http://$backend;
 
-//            proxy_set_header Host $host;
-//            proxy_set_header X-Real-IP $remote_addr;
-//            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-//            proxy_set_header X-Forwarded-Proto $scheme;
+           proxy_set_header Host $host;
+           proxy_set_header X-Real-IP $remote_addr;
+           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+           proxy_set_header X-Forwarded-Proto $scheme;
 
-//            proxy_http_version 1.1;
-//            proxy_set_header Upgrade $http_upgrade;
-//            proxy_set_header Connection "upgrade";
+           proxy_http_version 1.1;
+           proxy_set_header Upgrade $http_upgrade;
+           proxy_set_header Connection "upgrade";
 
-//            proxy_connect_timeout 60s;
-//            proxy_send_timeout 60s;
-//            proxy_read_timeout 60s;
-//        }
-//    }`;
+           proxy_connect_timeout 60s;
+           proxy_send_timeout 60s;
+           proxy_read_timeout 60s;
+       }
+   }`;
 
-//   const nginxConfigPath = path.join(__dirname, "../nginx/default.conf");
+  const nginxConfigPath = path.join(__dirname, "../nginx/default.conf");
 
-//   // Append Nginx Config (avoid duplicates)
-//   const nginxConfig = fs.readFileSync(nginxConfigPath, "utf8");
-//   if (!nginxConfig.includes(`${instanceName}.local`)) {
-//     fs.appendFileSync(nginxConfigPath, nginxTemplate);
-//   }
+  // Append Nginx Config (avoid duplicates)
+  const nginxConfig = fs.readFileSync(nginxConfigPath, "utf8");
+  if (!nginxConfig.includes(`${instanceName}.local`)) {
+    fs.appendFileSync(nginxConfigPath, nginxTemplate);
+  }
 
-//   // Create instance directory
-//   fs.mkdirSync(instanceDir, { recursive: true });
+  // Create instance directory
+  fs.mkdirSync(instanceDir, { recursive: true });
 
-//   // Copy template files
-//   const templatePath = path.join(__dirname, "../rafiki_template");
-//   ncp(templatePath, instanceDir, (err) => {
-//     if (err) {
-//       launchPadLogger.error(`Error copying template: ${err.message}`);
-//       return res.status(500).json({ status:500,message: "Error copying template." });
-//     }
+  // Copy template files
+  const templatePath = path.join(__dirname, "../rafiki_template");
+  ncp(templatePath, instanceDir, (err) => {
+    if (err) {
+      launchPadLogger.error(`Error copying template: ${err.message}`);
+      return res.status(500).json({ status:500,message: "Error copying template." });
+    }
 
-//     const composeFile = path.join(instanceDir, "dev/docker-compose.yml");
-//     getNextInstanceIndex((err, instanceIndex) => {
-//       if (err) return;
+    const composeFile = path.join(instanceDir, "dev/docker-compose.yml");
+    getNextInstanceIndex((err, instanceIndex) => {
+      if (err) return;
 
-//       // Modify docker-compose.yml for the rafiki instance
-//       modifyDockerCompose(composeFile, instanceName, instanceIndex,instanceWebhookURL,instanceExchangeRateURL);
+      // Modify docker-compose.yml for the rafiki instance
+      modifyDockerCompose(composeFile, instanceName, instanceIndex,instanceWebhookURL,instanceExchangeRateURL);
 
-//       // Add network to Nginx docker-compose.yml
-//       const nginxComposePath = "./docker-compose.yaml";
-//       modifyNginxDockerCompose(nginxComposePath, instanceName);
+      // Add network to Nginx docker-compose.yml
+      const nginxComposePath = "./docker-compose.yaml";
+      modifyNginxDockerCompose(nginxComposePath, instanceName);
 
-//       // Start the instance
-//       exec(
-//         `INSTANCE_NAME=${instanceName} docker-compose -f ${composeFile} --project-name ${instanceName} up -d`,
-//         (error, stdout, stderr) => {
-//           if (error) {
-//             launchPadLogger.error(`Error starting instance: ${error.message}`);
-//             return res
-//               .status(500)
-//               .json({ status:500,message: `Error starting instance: ${error.message}` });
-//           }
+      // Start the instance
+      exec(
+        `INSTANCE_NAME=${instanceName} docker-compose -f ${composeFile} --project-name ${instanceName} up -d`,
+        (error, stdout, stderr) => {
+          if (error) {
+            launchPadLogger.error(`Error starting instance: ${error.message}`);
+            return res
+              .status(500)
+              .json({ status:500,message: `Error starting instance: ${error.message}` });
+          }
           
-//           // Stop, Delete and Rebuild Nginx instance so as to capture the new rafiki instance
-//           exec(
-//             `docker-compose -f ${nginxComposePath} down --volumes && docker-compose -f ${nginxComposePath} up --build -d`,
-//             (composeRestartError) => {
-//               if (composeRestartError) {
-//                 launchPadLogger.error(
-//                   `Failed to restart container with new networks: ${composeRestartError.message}`
-//                 );
-//                 return;
-//               }
-//               launchPadLogger.log(
-//                 `Nginx container restarted with new network for ${instanceName}`
-//               );
+          // Stop, Delete and Rebuild Nginx instance so as to capture the new rafiki instance
+          exec(
+            `docker-compose -f ${nginxComposePath} down --volumes && docker-compose -f ${nginxComposePath} up --build -d`,
+            (composeRestartError) => {
+              if (composeRestartError) {
+                launchPadLogger.error(
+                  `Failed to restart container with new networks: ${composeRestartError.message}`
+                );
+                return;
+              }
+              launchPadLogger.log(
+                `Nginx container restarted with new network for ${instanceName}`
+              );
 
     
-//               // If docker-compose up succeeds, fetch container details
-//               launchPadLogger.log(`Container started for instance: ${instanceName}`);
+              // If docker-compose up succeeds, fetch container details
+              launchPadLogger.log(`Container started for instance: ${instanceName}`);
 
-//               // Get the container ID or name associated with this instance
-//               exec(
-//                 `docker ps -q --filter "name=${instanceName}_rafiki-backend"`, 
-//                 (error, stdout, stderr) => {
-//                   if (error) {
-//                     launchPadLogger.error(`docker ps error: ${error}`);
-//                     return;
-//                   }
+              // Get the container ID or name associated with this instance
+              exec(
+                `docker ps -q --filter "name=${instanceName}_rafiki-backend"`, 
+                (error, stdout, stderr) => {
+                  if (error) {
+                    launchPadLogger.error(`docker ps error: ${error}`);
+                    return;
+                  }
 
-//                   const containerId = stdout.trim();  // Container ID associated with the instance
-//                   if (containerId) {
-//                     // Use docker inspect to get details about the container, such as its creation time and status
-//                     exec(
-//                       `docker inspect --format='{{.State.Status}} {{.Created}}' ${containerId}`,
-//                       (error, stdout, stderr) => {
-//                         if (error) {
-//                           launchPadLogger.error(`docker inspect error: ${error}`);
-//                           return;
-//                         }
+                  const containerId = stdout.trim();  // Container ID associated with the instance
+                  if (containerId) {
+                    // Use docker inspect to get details about the container, such as its creation time and status
+                    exec(
+                      `docker inspect --format='{{.State.Status}} {{.Created}}' ${containerId}`,
+                      (error, stdout, stderr) => {
+                        if (error) {
+                          launchPadLogger.error(`docker inspect error: ${error}`);
+                          return;
+                        }
 
-//                         // Process the result to display the container status and creation time
-//                         const [status, createdAt] = stdout.split(' ');  // Separate the status and creation time
+                        // Process the result to display the container status and creation time
+                        const [status, createdAt] = stdout.split(' ');  // Separate the status and creation time
 
-//                         // Prepare the data to be added to the database
-//                         const newInstance = {
-//                           id: containerId, // Use the container ID as the unique instance ID
-//                           instance_name: instanceName,
-//                           admin_api: `${instanceName}.rafiki-launchpad.devligence.com`,
-//                           created_at: createdAt,
-//                           status: status || 'Active', // Default to 'Active' if status is undefined
-//                         };
+                        // Prepare the data to be added to the database
+                        const newInstance = {
+                          id: containerId, // Use the container ID as the unique instance ID
+                          instance_name: instanceName,
+                          admin_api: `${instanceName}.rafiki-launchpad.devligence.com`,
+                          created_at: createdAt,
+                          status: status || 'Active', // Default to 'Active' if status is undefined
+                        };
 
-//                         // Push the new instance into the database
-//                         database[token].instances.push(newInstance);
+                        // Push the new instance into the database
+                        database[token].instances.push(newInstance);
 
-//                         // Write the updated database back to the file
-//                         writeDatabase(DB_FILE, database);
+                        // Write the updated database back to the file
+                        writeDatabase(DB_FILE, database);
 
-//                         launchPadLogger.log(`New instance added to database: ${instanceName}`);
+                        launchPadLogger.log(`New instance added to database: ${instanceName}`);
 
 
-//                         res
-//                         .status(200)
-//                         .json({status:200,
-//                           message: `${instanceName} (Rafiki instance) creation Success.`,
-//                         });
-//                       }
-//                     );
-//                   } else {
-//                     launchPadLogger.log('No container found with this name.');
-//                   }
-//                 }
-//               );
-//             }
-//           );
-//         }
-//       );
-//     });
-//   });
-// });
+                        res
+                        .status(200)
+                        .json({status:200,
+                          message: `${instanceName} (Rafiki instance) creation Success.`,
+                        });
+                      }
+                    );
+                  } else {
+                    launchPadLogger.log('No container found with this name.');
+                  }
+                }
+              );
+            }
+          );
+        }
+      );
+    });
+  });
+});
 
-router.post("/create-instance",(req, res)=>{
-  getNextInstanceIndex((err, instanceIndex) => {
-    launchPadLogger.info("index")
-    launchPadLogger.info(instanceIndex)
 
-    getDynamicSubnet(instanceIndex)
-  })
-})
 
 router.get("/status/:instanceName", (req, res) => {
   const { instanceName } = req.params;
