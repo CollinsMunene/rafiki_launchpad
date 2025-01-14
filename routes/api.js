@@ -182,6 +182,8 @@ router.post("/create-instance", async (req, res) => {
     return res.status(400).json({ status: 400, message: "Instance already exists. Kindly use another name" });
   }
 
+  const originalNginxContainerComposeContent = fs.readFileSync('../nginx/default.conf', "utf8");
+
   const nginxTemplate = `
    server {
        listen 80;
@@ -220,10 +222,11 @@ router.post("/create-instance", async (req, res) => {
     if (!nginxConfig.includes(`${instanceName}.local`)) {
       fs.appendFileSync(nginxConfigPath, nginxTemplate);
       operations.push(() => {
+        fs.writeFileSync("../nginx/default.conf", originalNginxContainerComposeContent, "utf8");
         // Rollback nginx config by removing appended template
-        const updatedConfig = fs.readFileSync(nginxConfigPath, "utf8")
-          .replace(nginxTemplate, "");
-        fs.writeFileSync(nginxConfigPath, updatedConfig);
+        // const updatedConfig = fs.readFileSync(nginxConfigPath, "utf8")
+        //   .replace(nginxTemplate, "");
+        // fs.writeFileSync(nginxConfigPath, updatedConfig);
       });
     }
 
