@@ -41,8 +41,8 @@ function getDynamicSubnet(instanceIndex) {
   // Make thirdOctet align properly: starting from 1 when instanceIndex = 0
   const thirdOctet = instanceIndex + 1;
 
-  launchPadLogger.debug("new instance index");
-  launchPadLogger.debug(thirdOctet);
+  launchPadLogger.log("new instance index");
+  launchPadLogger.log(thirdOctet);
 
   return {
     subnet: `${baseSubnet}.${thirdOctet}.0/24`,
