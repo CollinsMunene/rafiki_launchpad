@@ -263,6 +263,7 @@ router.post("/create-instance", async (req, res) => {
     });
     operations.push(() => {
       execSync(`docker ps -q --filter "name=^${instanceName}_" | xargs -r docker rm -f`);
+      execSync(`docker ps -aq --filter "name=^${instanceName}_" --filter "status=created" | xargs -r docker rm`);
     });
 
     // Restart Nginx container
