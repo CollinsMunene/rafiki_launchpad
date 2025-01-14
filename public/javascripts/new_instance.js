@@ -71,7 +71,7 @@ document.getElementById('createInstanceButton').addEventListener('click', functi
             console.log(data.message)
             setTimeout(() => {
                 location.reload()
-            }, 5000);
+            }, 10000);
         }else{
             showToast(`${data.message}`,'success');
             setTimeout(() => {

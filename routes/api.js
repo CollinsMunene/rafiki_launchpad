@@ -285,7 +285,7 @@ router.post("/create-instance", async (req, res) => {
     for (const rollback of operations.reverse()) {
       try { rollback(); } catch (e) { launchPadLogger.error(`Rollback failed: ${e.message}`); }
     }
-    res.status(500).json({ status: 500, message: "Error creating instance. Changes reverted." });
+    res.status(500).json({ status: 500, message: `Error creating instance. Changes reverted. ${error.message}` });
   }
 });
 
