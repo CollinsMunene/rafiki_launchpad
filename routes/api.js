@@ -259,8 +259,7 @@ router.post("/create-instance", async (req, res) => {
       });
     });
     operations.push(() => {
-      execSync(`docker ps -a --filter "name=^${instanceName}_" --format "{{.ID}}" | xargs -r docker rm -f
-`);
+      execSync(`docker ps -q --filter "name=^${instanceName}_" | xargs -r docker rm -f`);
     });
 
     // Restart Nginx container
@@ -291,7 +290,8 @@ router.post("/create-instance", async (req, res) => {
     }
     // Restore the original content of docker-compose.yaml
     fs.writeFileSync("./docker-compose.yaml", originalNginxComposeContent, "utf8");
-    execSync(`docker network rm ${instanceName}_network"`)
+    execSync(`docker ps -aq -f "status=exited" | xargs -r docker rm`)
+    execSync(`docker network rm ${instanceName}_network`)
     res.status(500).json({ status: 500, message: `Error creating instance. Changes reverted. ${error.message}` });
   }
 });
