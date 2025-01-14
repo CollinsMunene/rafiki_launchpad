@@ -68,9 +68,10 @@ document.getElementById('createInstanceButton').addEventListener('click', functi
         submit_button.disabled = false
         if(data.status!=200){
             showToast(`Error! ${data.message}`,'error');
+            console.log(data.message)
             setTimeout(() => {
                 location.reload()
-            }, 2000);
+            }, 5000);
         }else{
             showToast(`${data.message}`,'success');
             setTimeout(() => {
