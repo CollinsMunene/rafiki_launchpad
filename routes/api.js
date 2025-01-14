@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const { exec } = require("child_process");
+const { exec, execSync } = require("child_process");
 const ncp = require("ncp").ncp;
 var express = require("express");
 var router = express.Router();
