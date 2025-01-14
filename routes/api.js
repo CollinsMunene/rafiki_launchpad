@@ -182,8 +182,6 @@ router.post("/create-instance", async (req, res) => {
     return res.status(400).json({ status: 400, message: "Instance already exists. Kindly use another name" });
   }
 
-  const originalNginxContainerComposeContent = fs.readFileSync('../nginx/default.conf', "utf8");
-
   const nginxTemplate = `
    server {
        listen 80;
@@ -211,6 +209,9 @@ router.post("/create-instance", async (req, res) => {
 
   const nginxConfigPath = path.join(__dirname, "../nginx/default.conf");
 
+  const originalNginxContainerComposeContent = fs.readFileSync(nginxConfigPath, "utf8");
+
+
   const operations = []; // Keep track of successful operations for rollback
 
   // save previous compose incase of a revert
@@ -222,7 +223,7 @@ router.post("/create-instance", async (req, res) => {
     if (!nginxConfig.includes(`${instanceName}.local`)) {
       fs.appendFileSync(nginxConfigPath, nginxTemplate);
       operations.push(() => {
-        fs.writeFileSync("../nginx/default.conf", originalNginxContainerComposeContent, "utf8");
+        fs.writeFileSync(nginxConfigPath, originalNginxContainerComposeContent, "utf8");
         // Rollback nginx config by removing appended template
         // const updatedConfig = fs.readFileSync(nginxConfigPath, "utf8")
         //   .replace(nginxTemplate, "");
