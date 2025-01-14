@@ -1,34 +1,36 @@
 const BASE_URL = "http://rafiki-launchpad.devligence.com";
 
-document.getElementById("instanceName").addEventListener("input", function (event) {
-    const input = event.target;
+
+  // Function to update summary based on form input
+  function updateSummary() {
+    const instanceNameElement = document.getElementById('instanceName');
+    instanceNameElement
+    const instanceName = document.getElementById('instanceName').value;
+    const instanceWebhook = document.getElementById('instanceWebhookURL').value;
+    const instanceExchangeRateUrl = document.getElementById('instanceExchangeRateURL').value;
+
     const regex = /^[a-zA-Z]+[a-zA-Z0-9]*(?:[-_][a-zA-Z0-9]+)*$/;
     const errorMessage = document.getElementById("error-message");
     const submit_button = document.getElementById('createInstanceButton');
 
     
-    if (regex.test(input.value)) {
-        input.classList.remove("border-red-600");
-        input.classList.add("border-gray-300");
+    if (regex.test(instanceName)) {
+        instanceNameElement.classList.remove("border-red-600");
+        instanceNameElement.classList.add("border-gray-300");
         errorMessage.classList.add("hidden");
         submit_button.disabled = false
+
+        document.getElementById('summary-instance-name').textContent = instanceName || '-';
+        document.getElementById('summary-instance-webhook').textContent = instanceWebhook || '-';
+        document.getElementById('summary-instance-exchange-rate-url').textContent = instanceExchangeRateUrl || '-';
     } else {
-        input.classList.remove("border-gray-300");
-        input.classList.add("border-red-600");
+        instanceNameElement.classList.remove("border-gray-300");
+        instanceNameElement.classList.add("border-red-600");
         errorMessage.classList.remove("hidden");
-         submit_button.disabled = true
+        submit_button.disabled = true
     }
-});
 
-  // Function to update summary based on form input
-  function updateSummary() {
-    const instanceName = document.getElementById('instanceName').value;
-    const instanceWebhook = document.getElementById('instanceWebhookURL').value;
-    const instanceExchangeRateUrl = document.getElementById('instanceExchangeRateURL').value;
 
-    document.getElementById('summary-instance-name').textContent = instanceName || '-';
-    document.getElementById('summary-instance-webhook').textContent = instanceWebhook || '-';
-    document.getElementById('summary-instance-exchange-rate-url').textContent = instanceExchangeRateUrl || '-';
 }
 // Handle the create button click
 document.getElementById('createInstanceButton').addEventListener('click', function () {
@@ -66,9 +68,10 @@ document.getElementById('createInstanceButton').addEventListener('click', functi
         submit_button.disabled = false
         if(data.status!=200){
             showToast(`Error! ${data.message}`,'error');
+            console.log(data.message)
             setTimeout(() => {
                 location.reload()
-            }, 2000);
+            }, 5000);
         }else{
             showToast(`${data.message}`,'success');
             setTimeout(() => {
