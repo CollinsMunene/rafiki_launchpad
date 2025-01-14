@@ -211,6 +211,9 @@ router.post("/create-instance", async (req, res) => {
 
   const operations = []; // Keep track of successful operations for rollback
 
+  // save previous compose incase of a revert
+  const originalNginxComposeContent = fs.readFileSync('./docker-compose.yaml', "utf8");
+
   try {
     // Append Nginx config if not already present
     const nginxConfig = fs.readFileSync(nginxConfigPath, "utf8");
@@ -256,7 +259,7 @@ router.post("/create-instance", async (req, res) => {
       });
     });
     operations.push(() => {
-      execSync(`INSTANCE_NAME=${instanceName} docker-compose -f ${composeFile} --project-name ${instanceName} down --volumes`);
+      execSync(`docker ps -q --filter "name=^${instanceName}_" | xargs -r docker rm -f`);
     });
 
     // Restart Nginx container
@@ -285,6 +288,10 @@ router.post("/create-instance", async (req, res) => {
     for (const rollback of operations.reverse()) {
       try { rollback(); } catch (e) { launchPadLogger.error(`Rollback failed: ${e.message}`); }
     }
+    // Restore the original content of docker-compose.yaml
+    fs.writeFileSync("./docker-compose.yaml", originalNginxComposeContent, "utf8");
+    execSync(`docker ps -aq -f "status=exited" | xargs -r docker rm`)
+    execSync(`docker network rm ${instanceName}_network`)
     res.status(500).json({ status: 500, message: `Error creating instance. Changes reverted. ${error.message}` });
   }
 });
