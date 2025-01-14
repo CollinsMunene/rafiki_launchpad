@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const { exec } = require("child_process");
+const { exec, execSync } = require("child_process");
 const ncp = require("ncp").ncp;
 var express = require("express");
 var router = express.Router();
@@ -211,6 +211,9 @@ router.post("/create-instance", async (req, res) => {
 
   const operations = []; // Keep track of successful operations for rollback
 
+  // save previous compose incase of a revert
+  const originalNginxComposeContent = fs.readFileSync('./docker-compose.yaml', "utf8");
+
   try {
     // Append Nginx config if not already present
     const nginxConfig = fs.readFileSync(nginxConfigPath, "utf8");
@@ -285,6 +288,9 @@ router.post("/create-instance", async (req, res) => {
     for (const rollback of operations.reverse()) {
       try { rollback(); } catch (e) { launchPadLogger.error(`Rollback failed: ${e.message}`); }
     }
+    // Restore the original content of docker-compose.yaml
+    fs.writeFileSync("./docker-compose.yaml", originalNginxComposeContent, "utf8");
+    execSync(`docker network rm ${instanceName}_network"`)
     res.status(500).json({ status: 500, message: `Error creating instance. Changes reverted. ${error.message}` });
   }
 });
