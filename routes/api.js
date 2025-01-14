@@ -259,7 +259,8 @@ router.post("/create-instance", async (req, res) => {
       });
     });
     operations.push(() => {
-      execSync(`INSTANCE_NAME=${instanceName} docker-compose -f ${composeFile} --project-name ${instanceName} down --volumes`);
+      execSync(`docker ps -a --filter "name=^${instanceName}_" --format "{{.ID}}" | xargs -r docker rm -f
+`);
     });
 
     // Restart Nginx container
