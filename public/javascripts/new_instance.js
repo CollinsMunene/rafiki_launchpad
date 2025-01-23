@@ -1,4 +1,6 @@
 const BASE_URL = "http://rafiki-launchpad.devligence.com";
+// const BASE_URL = "http://localhost:3000";
+
 
 
   // Function to update summary based on form input
