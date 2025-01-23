@@ -1,1 +1,71 @@
-{}
+{
+  "35086893-2084-4c69-8326-42278c6570fb": {
+    "instances": [
+      {
+        "id": "b3e2d848ae72",
+        "instance_name": "collins1",
+        "admin_api": "collins1.rafiki-launchpad.devligence.com",
+        "created_at": "2025-01-14T17:40:53.583264186Z\n",
+        "status": "running"
+      },
+      {
+        "id": "d054507dc593",
+        "instance_name": "collins2",
+        "admin_api": "collins2.rafiki-launchpad.devligence.com",
+        "created_at": "2025-01-14T19:45:04.287076278Z\n",
+        "status": "running"
+      },
+      {
+        "id": "22f53c94a608",
+        "instance_name": "collins3",
+        "admin_api": "collins3.rafiki-launchpad.devligence.com",
+        "created_at": "2025-01-14T19:45:25.726556406Z\n",
+        "status": "running"
+      },
+      {
+        "id": "78c13a860d1e",
+        "instance_name": "collins4",
+        "admin_api": "collins4.rafiki-launchpad.devligence.com",
+        "created_at": "2025-01-14T19:46:02.392462824Z\n",
+        "status": "running"
+      },
+      {
+        "id": "a53be7028a10",
+        "instance_name": "collins5",
+        "admin_api": "collins5.rafiki-launchpad.devligence.com",
+        "created_at": "2025-01-23T07:15:48.372588794Z\n",
+        "status": "running"
+      }
+    ]
+  },
+  "89689829-aafb-4f46-9a89-0de325434742": {
+    "instances": []
+  },
+  "a612c81a-4434-4d75-a3bd-f07dfbba92f1": {
+    "instances": []
+  },
+  "f5216d5c-f9c7-45f3-a431-aad70f12644d": {
+    "instances": []
+  },
+  "5d966ff4-8f75-4ea3-bc73-430fdd76ebb3": {
+    "instances": []
+  },
+  "3c1ed592-71c2-44bc-9b75-03ba1d03977e": {
+    "instances": []
+  },
+  "d5ca6722-7e38-4b57-8286-6e9431b03c0d": {
+    "instances": []
+  },
+  "b05d26db-9297-4281-953d-5001e5c3265a": {
+    "instances": []
+  },
+  "d81af12e-ec2a-4ddc-950e-35428c1f05b4": {
+    "instances": []
+  },
+  "9ec41d9d-1b37-48fb-8858-844e4556761d": {
+    "instances": []
+  },
+  "060f5b64-0a21-45d9-9a1f-ec6fc9ab99fb": {
+    "instances": []
+  }
+}
