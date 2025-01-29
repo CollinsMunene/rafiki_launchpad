@@ -6,3 +6,17 @@ services:
     container_name: nginx
     ports:
       - '8080:80'
+    networks:
+      - collins6_network
+      - collins7_network
+      - collins8_network
+      - myrafiki_network
+networks:
+  collins6_network:
+    external: true
+  collins7_network:
+    external: true
+  collins8_network:
+    external: true
+  myrafiki_network:
+    external: true
